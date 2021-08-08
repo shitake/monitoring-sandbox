@@ -1,0 +1,16 @@
+groups:
+  # ルール名
+  - name: test-server
+    rules:
+      # アラート名
+      - alert: instance_down
+        # 条件
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          # 異常時のメッセージ
+          firing_text: "{{ $labels.instance }} has been down for more than 1 minutes."
+          # 解消時のメッセージ
+          resolved_text: "{{ $labels.instance }} has recoverd."

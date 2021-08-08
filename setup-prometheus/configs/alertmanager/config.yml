@@ -1,0 +1,17 @@
+global:
+  resolve_timeout: 1m
+  slack_api_url: 'https://hooks.slack.com/services/[SLACK_API_URL]'
+
+route:
+  receiver: 'slack-notifications'
+  # 再通知までの間隔
+  repeat_interval: 1m
+
+receivers:
+  - name: 'slack-notifications'
+    slack_configs:
+      - channel: '#notification'
+        title: '{{ if eq .Status "firing" }} [FIRING] {{ else }} [RESOLVED] {{ end }}'
+        text: '{{ if eq .Status "firing" }} {{ .CommonAnnotations.firing_text }} {{ else }} {{ .CommonAnnotations.resolved_text }} {{ end }}'
+        send_resolved: true
+

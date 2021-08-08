@@ -1,0 +1,51 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    monitor: 'test-monitor'
+
+rule_files:
+  - /etc/prometheus/alert.rules
+
+# AlertManager
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+          # AlertManager
+            - '[ALERT_MANAGER_IP:PORT]'
+
+scrape_configs:
+  - job_name: 'blackbox-icmp'
+    metrics_path: /probe
+    params:
+      module: [icmp]
+    static_configs:
+      - targets:
+        - [MONITORING_TARGET_IP:PORT]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: [BLACKBOX_EXPORTER_IP:PORT]
+
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        # 監視対象
+        - [MONITORING_TARGET_IP:PORT]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        # Blackbox Exporter
+        replacement: [BLACKBOX_EXPORTER_IP:PORT]
